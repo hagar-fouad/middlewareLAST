@@ -1,0 +1,1 @@
+[{"x":142,"y":127,"type":"start","next":{"x":188,"y":260,"type":"addition"},"previous":{"x":0,"y":0},"userdata":[]},{"x":188,"y":260,"type":"addition","next":{"x":184,"y":404,"type":"end"},"previous":{"x":142,"y":127,"type":"start"},"userdata":["var1","var2"]},{"x":184,"y":404,"type":"end","next":{"x":0,"y":0},"previous":{"x":188,"y":260,"type":"addition"},"userdata":[]}]
