@@ -7,8 +7,10 @@ import java.util.*;
 
 @RestController
 public class MiddlewareController {
-    Map< String,Integer> variablesMap =
-            new HashMap< String,Integer>();
+   // Map< String,Integer> variablesMap =
+          //  new HashMap< String,Integer>();
+    int v1;
+    int v2;
     @Autowired
     private WorkflowService workflowService;
     @GetMapping("middleware/subscriber/{mobileNum}")
@@ -16,24 +18,37 @@ public class MiddlewareController {
                          @RequestParam String workflow, @RequestParam String action)
     {
         System.out.println(mobileNum);
-        variablesMap.put("var1",Integer.parseInt(var1));
-        variablesMap.put("var2",Integer.parseInt(var2));
-        System.out.println(variablesMap);
+       // variablesMap.put("var1",Integer.parseInt(var1));
+        //variablesMap.put("var2",Integer.parseInt(var2));
+        //System.out.println(variablesMap);
+         v1=Integer.parseInt(var1);
+        v2=Integer.parseInt(var2);
         Shape[] s=workflowService.getWorkflow(workflow);
         System.out.println(s);
-        for(int i=0; i<s.length; i++) {
+        int i=0;
+        System.out.println(s[0].getNext());
+        while(s[i].getNext().getType()!=null)
+        {
+            System.out.println(s[i].getType());
+            System.out.println(s[i].getNext().getType());
             executeshape(s[i]);
+
+            i++;
         }
+       // for(int i=0; i<s.length; i++) {
+         //
+      //  }
 
     }
-    String []variables;
+    //String []variables;
 
     public void executeshape(Shape s)
     {
-        variables=s.getUserdata();
-        System.out.println(variables[0]);
-        int v1=variablesMap.get(variables[0]);
-        int v2=variablesMap.get(variables[1]);
+       // variables=s.getUserdata();
+       // System.out.println(variables[0]);
+
+       // int v1=variablesMap.get();
+       // int v2=variablesMap.get(variables[1]);
         int res;
         switch (s.getType()) {
             case "addition":
