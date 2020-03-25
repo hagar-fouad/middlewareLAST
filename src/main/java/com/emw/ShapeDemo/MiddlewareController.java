@@ -25,16 +25,61 @@ public class MiddlewareController {
         v2=Integer.parseInt(var2);
         Shape[] s=workflowService.getWorkflow(workflow);
         System.out.println(s);
-        int i=0;
+        int count=0;
         System.out.println(s[0].getNext());
-        while(s[i].getNext().getType()!=null)
+        System.out.println();
+        for(int i=0; i<s.length; i++)
         {
-            System.out.println(s[i].getType());
-            System.out.println(s[i].getNext().getType());
-            executeshape(s[i]);
-
-            i++;
+            if(s[i]!=null)
+            {
+               count++;
+            }
+            else
+            {
+                break;
+            }
         }
+         //always start is first in array
+
+
+        Shape temp=s[0];
+        Shape endd=new Shape(0,0,"end",null,null,null,"");
+
+        while(temp.getType()!=endd.getType()) //for one end and always start at the beginning of the array
+        {
+            int innerCount=count;
+            while(innerCount!=0)
+            {
+                System.out.println(temp.getNext().getX());
+                System.out.println(s[innerCount-1].getX());
+               if(temp.getNext().getX()==s[innerCount-1].getX() && temp.getNext().getY()==s[innerCount-1].getY())
+               {
+
+                  temp=s[innerCount-1];
+                   executeshape(temp);
+                  break;
+               }
+               else
+               {
+                   innerCount--;
+               }
+
+            }
+            System.out.println(temp.getNext());
+            System.out.println(temp.getType());
+            System.out.println(endd.getType());
+        }
+
+
+
+//        while(count!=0)
+//        {
+//            System.out.println(s[count-1].getType());
+//            System.out.println(s[count-1].getNext().getType());
+//            executeshape(s[count-1]);
+//
+//            count--;
+//        }
        // for(int i=0; i<s.length; i++) {
          //
       //  }
@@ -80,7 +125,15 @@ public class MiddlewareController {
                 res=~v1;
                 System.out.println(res);
                 break;
-
+            case "diamond"    :
+                String [] con;
+                String [] splitedValue;
+                con=s.getUserdata();
+                splitedValue=con[0].split(" ");
+                for(int i=0; i<splitedValue.length; i++)
+                {
+                    System.out.println(splitedValue[i]);
+                }
         }
 
     }
