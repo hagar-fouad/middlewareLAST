@@ -45,7 +45,7 @@ public class MiddlewareController {
         Shape temp=s[0];
         Shape endd=new Shape(0,0,"end",null,null,null,"");
 
-        while(temp.getType()!=endd.getType()) //for one end and always start at the beginning of the array
+        while(temp.getNext().getType()!=null) //for one end and always start at the beginning of the array
         {
             int innerCount=count;
             while(innerCount!=0)
@@ -65,9 +65,8 @@ public class MiddlewareController {
                }
 
             }
-            System.out.println(temp.getNext());
-            System.out.println(temp.getType());
-            System.out.println(endd.getType());
+            System.out.println(temp.getNext().getType());
+
         }
 
 
