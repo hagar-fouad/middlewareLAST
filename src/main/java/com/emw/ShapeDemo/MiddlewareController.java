@@ -2,32 +2,36 @@ package com.emw.ShapeDemo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
 
 import java.util.*;
 
 @RestController
 public class MiddlewareController {
-   // Map< String,Integer> variablesMap =
-          //  new HashMap< String,Integer>();
+     Map< String,String> variablesMap =
+      new HashMap< String,String>();
     int v1;
     int v2;
     @Autowired
     private WorkflowService workflowService;
-    @GetMapping("middleware/subscriber/{mobileNum}")
-    public void workflow(@PathVariable String mobileNum, @RequestParam String var1,@RequestParam String var2,
-                         @RequestParam String workflow, @RequestParam String action)
+
+
+
+   @GetMapping("middleware/subscriber/{workflow}")
+    public void workflow(@PathVariable String workflow, WebRequest webRequest)
+
     {
-        System.out.println(mobileNum);
-       // variablesMap.put("var1",Integer.parseInt(var1));
-        //variablesMap.put("var2",Integer.parseInt(var2));
-        //System.out.println(variablesMap);
-         v1=Integer.parseInt(var1);
-        v2=Integer.parseInt(var2);
+        Map<String, String[]> params = webRequest.getParameterMap();
+        for (Map.Entry<String, String[]> entry : params.entrySet()) {
+            System.out.println("Key = " + entry.getKey() +
+                    ", Value = " + entry.getValue()[0]);
+            variablesMap.put(entry.getKey(), entry.getValue()[0]);
+        }
+
         Shape[] s=workflowService.getWorkflow(workflow);
         System.out.println(s);
         int count=0;
-        System.out.println(s[0].getNext());
-        System.out.println();
+
         for(int i=0; i<s.length; i++)
         {
             if(s[i]!=null)
@@ -39,12 +43,8 @@ public class MiddlewareController {
                 break;
             }
         }
-         //always start is first in array
-
 
         Shape temp=s[0];
-        Shape endd=new Shape(0,0,"end",null,null,null,"");
-
         while(temp.getNext().getType()!=null) //for one end and always start at the beginning of the array
         {
             int innerCount=count;
@@ -56,6 +56,7 @@ public class MiddlewareController {
                {
 
                   temp=s[innerCount-1];
+
                    executeshape(temp);
                   break;
                }
@@ -88,11 +89,33 @@ public class MiddlewareController {
 
     public void executeshape(Shape s)
     {
-       // variables=s.getUserdata();
-       // System.out.println(variables[0]);
+        String [] var;
 
-       // int v1=variablesMap.get();
-       // int v2=variablesMap.get(variables[1]);
+        var=s.getUserdata();
+        if(var.length>=1)
+        {
+
+            for (String name : variablesMap.keySet())
+            {
+                // search  for value
+                if(name==var[0]) {
+                     v1 = Integer.parseInt(variablesMap.get(name));
+                    System.out.println("Key = " + name + ", Value = " + v1);
+                }
+                if(var.length==2) {
+                    if (name == var[1]) {
+                        v2 = Integer.parseInt(variablesMap.get(name));
+                        System.out.println("Key = " + name + ", Value = " + v2);
+                    }
+                }
+            }
+
+        }
+        else
+        {
+            System.out.println("fadyaaaaaaaaaaaa");
+        }
+
         int res;
         switch (s.getType()) {
             case "addition":
