@@ -23,8 +23,8 @@ public class MiddlewareController {
     {
         Map<String, String[]> params = webRequest.getParameterMap();
         for (Map.Entry<String, String[]> entry : params.entrySet()) {
-            System.out.println("Key = " + entry.getKey() +
-                    ", Value = " + entry.getValue()[0]);
+//            System.out.println("Key = " + entry.getKey() +
+//                    ", Value = " + entry.getValue()[0]);
             variablesMap.put(entry.getKey(), entry.getValue()[0]);
         }
 
@@ -50,8 +50,7 @@ public class MiddlewareController {
             int innerCount=count;
             while(innerCount!=0)
             {
-                System.out.println(temp.getNext().getX());
-                System.out.println(s[innerCount-1].getX());
+
                if(temp.getNext().getX()==s[innerCount-1].getX() && temp.getNext().getY()==s[innerCount-1].getY())
                {
 
@@ -71,21 +70,8 @@ public class MiddlewareController {
         }
 
 
-
-//        while(count!=0)
-//        {
-//            System.out.println(s[count-1].getType());
-//            System.out.println(s[count-1].getNext().getType());
-//            executeshape(s[count-1]);
-//
-//            count--;
-//        }
-       // for(int i=0; i<s.length; i++) {
-         //
-      //  }
-
     }
-    //String []variables;
+
 
     public void executeshape(Shape s)
     {
@@ -97,15 +83,16 @@ public class MiddlewareController {
 
             for (String name : variablesMap.keySet())
             {
+
                 // search  for value
-                if(name==var[0]) {
+                if(name.equals(var[0])) { //v2
                      v1 = Integer.parseInt(variablesMap.get(name));
-                    System.out.println("Key = " + name + ", Value = " + v1);
+//                    System.out.println("Key = " + name + ", Value = " + v1);
                 }
                 if(var.length==2) {
-                    if (name == var[1]) {
+                    if (name.equals(var[1])) { //v1
                         v2 = Integer.parseInt(variablesMap.get(name));
-                        System.out.println("Key = " + name + ", Value = " + v2);
+//                        System.out.println("Key = " + name + ", Value = " + v2);
                     }
                 }
             }
@@ -115,7 +102,7 @@ public class MiddlewareController {
         {
             System.out.println("fadyaaaaaaaaaaaa");
         }
-
+        int counter=0;
         int res;
         switch (s.getType()) {
             case "addition":
