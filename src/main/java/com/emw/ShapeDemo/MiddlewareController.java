@@ -72,7 +72,7 @@ public class MiddlewareController {
 
     }
 
-
+    int res;
     public void executeshape(Shape s)
     {
         String [] var;
@@ -103,7 +103,7 @@ public class MiddlewareController {
             System.out.println("fadyaaaaaaaaaaaa");
         }
         int counter=0;
-        int res;
+
         switch (s.getType()) {
             case "addition":
               //  System.out.println(variables[0]);
@@ -146,4 +146,9 @@ public class MiddlewareController {
         }
 
     }
+    @GetMapping("/Balance")
+    public int MYBALANCE(){
+        return  res;
+    }
+
 }
