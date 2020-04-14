@@ -10,6 +10,7 @@ import java.util.*;
 public class MiddlewareController {
      Map< String,String> variablesMap =
       new HashMap< String,String>();
+
     int v1;
     int v2;
     @Autowired
@@ -23,8 +24,8 @@ public class MiddlewareController {
     {
         Map<String, String[]> params = webRequest.getParameterMap();
         for (Map.Entry<String, String[]> entry : params.entrySet()) {
-//            System.out.println("Key = " + entry.getKey() +
-//                    ", Value = " + entry.getValue()[0]);
+            System.out.println("Key = " + entry.getKey() +
+                   ", Value = " + entry.getValue()[0]);
             variablesMap.put(entry.getKey(), entry.getValue()[0]);
         }
 
@@ -45,27 +46,27 @@ public class MiddlewareController {
         }
 
         Shape temp=s[0];
-        while(temp.getNext().getType()!=null) //for one end and always start at the beginning of the array
+        NextShape[] mytemp;
+        while(true) //for one end and always start at the beginning of the array
         {
-            int innerCount=count;
-            while(innerCount!=0)
-            {
+           mytemp= temp.getNext();
+           if (mytemp[0].getnextX()==0 && mytemp[0].getnextY()==0)
+               break;
+           if (mytemp.length==1) {//bt2kd mmn l trteb
+               int innerCount = count;
+               while (innerCount != 0) {
 
-               if(temp.getNext().getX()==s[innerCount-1].getX() && temp.getNext().getY()==s[innerCount-1].getY())
-               {
+                   if (mytemp[0].getnextX() == s[innerCount - 1].getX() && mytemp[0].getnextY() == s[innerCount - 1].getY()) {
 
-                  temp=s[innerCount-1];
+                       temp = s[innerCount - 1];
+                       executeshape(temp);
+                       break;
+                   } else {
+                       innerCount--;
+                   }
 
-                   executeshape(temp);
-                  break;
                }
-               else
-               {
-                   innerCount--;
-               }
-
-            }
-            System.out.println(temp.getNext().getType());
+           }
 
         }
 
@@ -73,41 +74,60 @@ public class MiddlewareController {
     }
 
     int res;
+   String myaction;
     public void executeshape(Shape s)
     {
         String [] var;
-
+        //berg3 l userdata bt3t l shape
         var=s.getUserdata();
-        if(var.length>=1)
+       /* System.out.println(var[0]);
+        System.out.println(var[1]);
+        System.out.println(var[2]);
+        System.out.println(var[3]);
+        System.out.println(var[4]);*/
+
+
+         if(var.length>=1)
         {
 
             for (String name : variablesMap.keySet())
             {
-
                 // search  for value
-                if(name.equals(var[0])) { //v2
+                if(name.equals(var[0])) { //v1
                      v1 = Integer.parseInt(variablesMap.get(name));
-//                    System.out.println("Key = " + name + ", Value = " + v1);
+                   System.out.println("Key = " + name + ", Value = " + v1);
                 }
                 if(var.length==2) {
-                    if (name.equals(var[1])) { //v1
+                    if (name.equals(var[1])) { //v2
                         v2 = Integer.parseInt(variablesMap.get(name));
-//                        System.out.println("Key = " + name + ", Value = " + v2);
+                       System.out.println("Key = " + name + ", Value = " + v2);
                     }
                 }
+                if (var.length>=3) {
+                    if (name.equals(var[1])) { //v2
+                        v2 = Integer.parseInt(variablesMap.get(name));
+                        System.out.println("Key = " + name + ", Value = " + v2);
+                    }
+                    if (name.equals(var[2]))
+                        myaction = variablesMap.get(name);
+                }
             }
-
         }
         else
         {
             System.out.println("fadyaaaaaaaaaaaa");
         }
         int counter=0;
-
+       // System.out.println(myaction);
+       if(s.getType().equals("diamond"))
+         s.setType(myaction);
+      //  System.out.println("///////////////");
+       // System.out.println(s.getType());
         switch (s.getType()) {
             case "addition":
               //  System.out.println(variables[0]);
                  res=v1+v2;
+                System.out.println("////////////");
                 System.out.println(res);
                 break;
             case "subtraction":
@@ -134,20 +154,22 @@ public class MiddlewareController {
                 res=~v1;
                 System.out.println(res);
                 break;
-            case "diamond"    :
-                String [] con;
+          //  case "diamond"    :
+
+                /*String [] con;
                 String [] splitedValue;
                 con=s.getUserdata();
                 splitedValue=con[0].split(" ");
                 for(int i=0; i<splitedValue.length; i++)
                 {
                     System.out.println(splitedValue[i]);
-                }
+                }*/
         }
 
     }
     @GetMapping("/Balance")
     public int MYBALANCE(){
+        System.out.println("SUCCESS");
         return  res;
     }
 

@@ -1,19 +1,36 @@
 package com.emw.ShapeDemo;
 
 import java.util.Arrays;
+class NextShape {
+    private long x;
+    private long y;
+    private String type;
 
+    public long getnextX() {
+        return x;
+    }
+
+    public long getnextY() {
+        return y;
+    }
+
+
+    public String getnextType() {
+        return type;
+    }
+}
 public class Shape {
     private long x;
     private long y;
     private String type;
-    private Shape next;
+    private NextShape[] next;
     private  Shape previous;
     private String[] userdata;
 
 
 
     private String id;
-    public Shape(long x, long y, String type, Shape next, Shape previous, String[] userdata,String id) {
+    public Shape(long x, long y, String type, NextShape[] next, Shape previous, String[] userdata,String id) {
         this.x = x;
         this.y = y;
         this.type = type;
@@ -40,11 +57,11 @@ public class Shape {
 
 
 
-    public Shape getNext() {
+    public NextShape[] getNext() {
         return next;
     }
 
-    public void setNext(Shape next) {
+    public void setNext(NextShape[] next) {
         this.next = next;
     }
 
