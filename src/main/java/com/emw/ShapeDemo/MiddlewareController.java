@@ -1,9 +1,33 @@
 package com.emw.ShapeDemo;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.WebRequest;
 
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import java.io.File;
+import java.io.StringReader;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.*;
 
 @RestController
@@ -17,18 +41,59 @@ public class MiddlewareController {
     private WorkflowService workflowService;
 
 
-
-   @GetMapping("middleware/subscriber/{workflow}")
-    public void workflow(@PathVariable String workflow, WebRequest webRequest)
-
+    private static Document convertStringToXMLDocument(String xmlString)
     {
+        //Parser that produces DOM object trees from XML content
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
+        //API to obtain DOM Document instance
+        DocumentBuilder builder = null;
+        try
+        {
+            //Create DocumentBuilder with default configuration
+            builder = factory.newDocumentBuilder();
+
+            //Parse the content to Document object
+            Document doc = builder.parse(new InputSource(new StringReader(xmlString)));
+            return doc;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public  void Readfile(String mob) throws ParserConfigurationException, IOException, SAXException, TransformerException {
+        //File xmlFile = new File("GetAccountDetails_Request.xml");
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+        Document doc = docBuilder.parse("GetAccountDetails_Request.xml");
+        // Get the root element
+        Node methodcall = doc.getFirstChild();
+        NodeList nList = doc.getElementsByTagName("member");
+        Node node = nList.item(4);
+        Element eElement = (Element) node;
+
+        System.out.println(eElement.getElementsByTagName("name").item(0).getTextContent());
+        eElement.getElementsByTagName("value").item(0).setTextContent(mob);
+        System.out.println(eElement.getElementsByTagName("value").item(0).getTextContent());
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        DOMSource source = new DOMSource(doc);
+        StreamResult result = new StreamResult(new File("GetAccountDetails_Request2.xml"));
+        transformer.transform(source, result);
+    }
+
+    @GetMapping("middleware/{subscriber}/{workflow}")
+    public MiddlewareResponse workflow(@PathVariable String workflow,@PathVariable String subscriber, WebRequest webRequest) throws IOException, SAXException, ParserConfigurationException, TransformerException {
         Map<String, String[]> params = webRequest.getParameterMap();
         for (Map.Entry<String, String[]> entry : params.entrySet()) {
             System.out.println("Key = " + entry.getKey() +
                    ", Value = " + entry.getValue()[0]);
             variablesMap.put(entry.getKey(), entry.getValue()[0]);
         }
-
+        System.out.println(subscriber);
         Shape[] s=workflowService.getWorkflow(workflow);
         System.out.println(s);
         int count=0;
@@ -47,6 +112,10 @@ public class MiddlewareController {
 
         Shape temp=s[0];
         NextShape[] mytemp;
+        MiddlewareResponse MyResponse= new MiddlewareResponse();
+
+        MyResponse.status="Succes";
+
         while(true) //for one end and always start at the beginning of the array
         {
            mytemp= temp.getNext();
@@ -59,7 +128,8 @@ public class MiddlewareController {
                    if (mytemp[0].getnextX() == s[innerCount - 1].getX() && mytemp[0].getnextY() == s[innerCount - 1].getY()) {
 
                        temp = s[innerCount - 1];
-                       executeshape(temp);
+                       System.out.println(temp);
+                       MyResponse.result= executeshape(temp,subscriber);
                        break;
                    } else {
                        innerCount--;
@@ -70,13 +140,13 @@ public class MiddlewareController {
 
         }
 
-
+   return MyResponse;
     }
 
     int res;
+    String finalresult;
    String myaction;
-    public void executeshape(Shape s)
-    {
+    public String executeshape(Shape s,String mobilenumber) throws ParserConfigurationException, IOException, SAXException, TransformerException {
         String [] var;
         //berg3 l userdata bt3t l shape
         var=s.getUserdata();
@@ -115,7 +185,7 @@ public class MiddlewareController {
         }
         else
         {
-            System.out.println("fadyaaaaaaaaaaaa");
+            System.out.println("Empty");
         }
         int counter=0;
        // System.out.println(myaction);
@@ -125,34 +195,72 @@ public class MiddlewareController {
        // System.out.println(s.getType());
         switch (s.getType()) {
             case "addition":
-              //  System.out.println(variables[0]);
                  res=v1+v2;
                 System.out.println("////////////");
                 System.out.println(res);
+                finalresult=String.valueOf(res);
                 break;
             case "subtraction":
                 res=v1-v2;
                 System.out.println(res);
+                finalresult=String.valueOf(res);
                 break;
             case "multiplication":
                 res=v1*v2;
                 System.out.println(res);
+                finalresult=String.valueOf(res);
                 break;
             case "division":
                 res=v1/v2;
                 System.out.println(res);
+                finalresult=String.valueOf(res);
                 break;
             case "AND":
                 res=v1&v2;
                 System.out.println(res);
+                finalresult=String.valueOf(res);
                 break;
             case "OR":
                 res=v1 | v2;
                 System.out.println(res);
+                finalresult=String.valueOf(res);
                 break;
             case "NOT":
                 res=~v1;
                 System.out.println(res);
+                finalresult=String.valueOf(res);
+                break;
+            case "GetAccountDetails":
+                ///hktb l mobilel gayly fl URL
+                Readfile(mobilenumber);
+                ///bgeb l Response
+                RestTemplate restTemplate = new RestTemplate();
+                String fooResourceUrl
+                        = "http://localhost:8080/GetAccountDetails";
+                ResponseEntity<String> response
+                        = restTemplate.getForEntity(fooResourceUrl , String.class);
+                String responsebody=response.getBody();
+                Document doc = convertStringToXMLDocument( responsebody );
+                //Verify XML document is build correctly
+                //System.out.println(doc.getFirstChild().getNodeName());
+                Node methodcall = doc.getFirstChild();
+                NodeList nList = doc.getElementsByTagName("member");
+                for (int temp = 0; temp < nList.getLength(); temp++) {
+                    Node nNode = nList.item(temp);
+                    //System.out.println("\nCurrent Element :" + nNode.getNodeName());
+                    if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                        Element eElement = (Element) nNode;
+                        if (eElement.getElementsByTagName("name").item(0).getTextContent().equals("serviceClassCurrent")) {
+                            //  System.out.println("Name : " + eElement.getElementsByTagName("name").item(0).getTextContent());
+                            System.out.println("value: " + eElement.getElementsByTagName("value").item(0).getTextContent());
+                            finalresult=eElement.getElementsByTagName("value").item(0).getTextContent();
+                            break;
+                        }
+                    }
+                }
+                break;
+            case "ReadMobNumber":
+                finalresult=mobilenumber;
                 break;
           //  case "diamond"    :
 
@@ -164,13 +272,11 @@ public class MiddlewareController {
                 {
                     System.out.println(splitedValue[i]);
                 }*/
+
         }
 
+      return finalresult;
     }
-    @GetMapping("/Balance")
-    public int MYBALANCE(){
-        System.out.println("SUCCESS");
-        return  res;
-    }
+
 
 }

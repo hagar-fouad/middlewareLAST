@@ -10,18 +10,18 @@
 $.ajax({
          				type: "GET",
          				url: "/Balance",
-         				//data:JSON.stringify(shape),
          				success: getSuccess ,
          				contentType: "text",
-         				//dataType: 'json'
+
  });
 
 
  function getSuccess(data){
- console.log(data)
-  document.body.innerHTML = "<h1> " + data + "</h1> <h2>Status : Success</h2>"
-
+console.log(data)
+  document.body.innerHTML = "<h1> " + data + "</h1> "
+document.body.innnerHTML = "<h2>Status : Success</h2>"
  }
 </script>
+
 </body>
 </html>
