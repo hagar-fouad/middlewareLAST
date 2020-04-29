@@ -130,8 +130,11 @@ public class MiddlewareController {
                        temp = s[innerCount - 1];
                        System.out.println(temp);
                        MyResponse.result= executeshape(temp,subscriber);
+                       if (mytemp[0].getnextType().equals("diamond"))
+                           return MyResponse;
                        break;
-                   } else {
+                   }
+                   else {
                        innerCount--;
                    }
 
@@ -148,15 +151,7 @@ public class MiddlewareController {
    String myaction;
     public String executeshape(Shape s,String mobilenumber) throws ParserConfigurationException, IOException, SAXException, TransformerException {
         String [] var;
-        //berg3 l userdata bt3t l shape
         var=s.getUserdata();
-       /* System.out.println(var[0]);
-        System.out.println(var[1]);
-        System.out.println(var[2]);
-        System.out.println(var[3]);
-        System.out.println(var[4]);*/
-
-
          if(var.length>=1)
         {
 
@@ -188,7 +183,6 @@ public class MiddlewareController {
             System.out.println("Empty");
         }
         int counter=0;
-       // System.out.println(myaction);
        if(s.getType().equals("diamond"))
          s.setType(myaction);
       //  System.out.println("///////////////");
