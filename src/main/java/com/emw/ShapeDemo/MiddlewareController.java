@@ -89,15 +89,12 @@ public class MiddlewareController {
     public MiddlewareResponse workflow(@PathVariable String workflow,@PathVariable String subscriber, WebRequest webRequest) throws IOException, SAXException, ParserConfigurationException, TransformerException {
         Map<String, String[]> params = webRequest.getParameterMap();
         for (Map.Entry<String, String[]> entry : params.entrySet()) {
-            System.out.println("Key = " + entry.getKey() +
-                   ", Value = " + entry.getValue()[0]);
             variablesMap.put(entry.getKey(), entry.getValue()[0]);
         }
-        System.out.println(subscriber);
+
         Shape[] s=workflowService.getWorkflow(workflow);
         System.out.println(s);
         int count=0;
-
         for(int i=0; i<s.length; i++)
         {
             if(s[i]!=null)
@@ -111,27 +108,46 @@ public class MiddlewareController {
         }
 
         Shape temp=s[0];
+        //hwa hwa el shape
         NextShape[] mytemp;
         MiddlewareResponse MyResponse= new MiddlewareResponse();
-
         MyResponse.status="Succes";
-
+        String [] conditionUserdata;
+        NextShape [] conditionNexts;
         while(true) //for one end and always start at the beginning of the array
         {
-           mytemp= temp.getNext();
+            mytemp= temp.getNext();
+            if (temp.getType().equals("diamond"))
+            {
+                conditionUserdata =temp.getUserdata();
+                if(variablesMap.containsKey(conditionUserdata[0])) {
+                    myaction = variablesMap.get(conditionUserdata[0]);
+                   conditionNexts=temp.getNext();
+                    if(conditionNexts[0].getnextType().equals(myaction))
+                    {
+                        mytemp[0]=conditionNexts[0];
+                    }
+                    else
+                    {
+                        mytemp[0]=conditionNexts[1];
+                    }
+                }
+                else
+                {
+                    MyResponse.status="failer";
+                }
+
+            }
            if (mytemp[0].getnextX()==0 && mytemp[0].getnextY()==0)
                break;
-           if (mytemp.length==1) {//bt2kd mmn l trteb
+           if (mytemp.length==1) {//bt2kd an start awl haga btdkholi msh diamond awl haga tkhosh
                int innerCount = count;
                while (innerCount != 0) {
-
                    if (mytemp[0].getnextX() == s[innerCount - 1].getX() && mytemp[0].getnextY() == s[innerCount - 1].getY()) {
-
                        temp = s[innerCount - 1];
-                       System.out.println(temp);
                        MyResponse.result= executeshape(temp,subscriber);
-                       if (mytemp[0].getnextType().equals("diamond"))
-                           return MyResponse;
+                      // if (mytemp[0].getnextType().equals("diamond"))
+                        //   return MyResponse;
                        break;
                    }
                    else {
@@ -140,15 +156,14 @@ public class MiddlewareController {
 
                }
            }
-
         }
-
    return MyResponse;
     }
 
     int res;
     String finalresult;
    String myaction;
+   int resultCount=1;
     public String executeshape(Shape s,String mobilenumber) throws ParserConfigurationException, IOException, SAXException, TransformerException {
         String [] var;
         var=s.getUserdata();
@@ -158,24 +173,27 @@ public class MiddlewareController {
             for (String name : variablesMap.keySet())
             {
                 // search  for value
-                if(name.equals(var[0])) { //v1
-                     v1 = Integer.parseInt(variablesMap.get(name));
-                   System.out.println("Key = " + name + ", Value = " + v1);
+                if(var.length==1) {
+                    if (name.equals(var[0])) { //v1
+                        v1 = Integer.parseInt(variablesMap.get(name));
+                        System.out.println("Key = " + name + ", Value = " + v1);
+                    }
                 }
                 if(var.length==2) {
                     if (name.equals(var[1])) { //v2
                         v2 = Integer.parseInt(variablesMap.get(name));
-                       System.out.println("Key = " + name + ", Value = " + v2);
+
                     }
                 }
-                if (var.length>=3) {
-                    if (name.equals(var[1])) { //v2
-                        v2 = Integer.parseInt(variablesMap.get(name));
-                        System.out.println("Key = " + name + ", Value = " + v2);
-                    }
-                    if (name.equals(var[2]))
-                        myaction = variablesMap.get(name);
-                }
+//                if (var.length==3) {
+//                    //////////////msh 3rfa eh lzmt deee
+//                    if (name.equals(var[1])) { //v2
+//                        v2 = Integer.parseInt(variablesMap.get(name));
+//
+//                    }
+//                    if (name.equals(var[0]))//at2kd ano condition
+//                        myaction = variablesMap.get(name); // myaction feha el gayli mn url an kan addation aw subtraction
+//                }
             }
         }
         else
@@ -190,39 +208,45 @@ public class MiddlewareController {
         switch (s.getType()) {
             case "addition":
                  res=v1+v2;
-                System.out.println("////////////");
-                System.out.println(res);
                 finalresult=String.valueOf(res);
+                variablesMap.put("res"+resultCount, finalresult);
+                resultCount++;
                 break;
             case "subtraction":
                 res=v1-v2;
-                System.out.println(res);
                 finalresult=String.valueOf(res);
+                variablesMap.put("res"+resultCount, finalresult);
+                resultCount++;
                 break;
             case "multiplication":
                 res=v1*v2;
-                System.out.println(res);
                 finalresult=String.valueOf(res);
+                variablesMap.put("res"+resultCount, finalresult);
+                resultCount++;
                 break;
             case "division":
                 res=v1/v2;
-                System.out.println(res);
                 finalresult=String.valueOf(res);
+                variablesMap.put("res"+resultCount, finalresult);
+                resultCount++;
                 break;
             case "AND":
                 res=v1&v2;
-                System.out.println(res);
                 finalresult=String.valueOf(res);
+                variablesMap.put("res"+resultCount, finalresult);
+                resultCount++;
                 break;
             case "OR":
                 res=v1 | v2;
-                System.out.println(res);
                 finalresult=String.valueOf(res);
+                variablesMap.put("res"+resultCount, finalresult);
+                resultCount++;
                 break;
             case "NOT":
                 res=~v1;
-                System.out.println(res);
                 finalresult=String.valueOf(res);
+                variablesMap.put("res"+resultCount, finalresult);
+                resultCount++;
                 break;
             case "GetAccountDetails":
                 ///hktb l mobilel gayly fl URL
