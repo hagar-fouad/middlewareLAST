@@ -2,7 +2,6 @@ package com.emw.ShapeDemo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.WebRequest;
@@ -21,13 +20,11 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.*;
 
 @RestController
@@ -117,48 +114,59 @@ public class MiddlewareController {
         while(true) //for one end and always start at the beginning of the array
         {
             mytemp= temp.getNext();
-            if (temp.getType().equals("diamond"))
-            {
-                conditionUserdata =temp.getUserdata();
-                if(variablesMap.containsKey(conditionUserdata[0])) {
-                    myaction = variablesMap.get(conditionUserdata[0]);
-                   conditionNexts=temp.getNext();
-                    if(conditionNexts[0].getnextType().equals(myaction))
-                    {
-                        mytemp[0]=conditionNexts[0];
-                    }
-                    else
-                    {
-                        mytemp[0]=conditionNexts[1];
-                    }
-                }
-                else
-                {
-                    MyResponse.status="failer";
-                }
 
-            }
            if (mytemp[0].getnextX()==0 && mytemp[0].getnextY()==0)
                break;
            if (mytemp.length==1) {//bt2kd an start awl haga btdkholi msh diamond awl haga tkhosh
                int innerCount = count;
-               while (innerCount != 0) {
-                   if (mytemp[0].getnextX() == s[innerCount - 1].getX() && mytemp[0].getnextY() == s[innerCount - 1].getY()) {
-                       temp = s[innerCount - 1];
-                       MyResponse.result= executeshape(temp,subscriber);
-                      // if (mytemp[0].getnextType().equals("diamond"))
-                        //   return MyResponse;
-                       break;
+               temp= getCompleteShape(mytemp,s,count);
+               if (temp.getType().equals("diamond"))
+               {
+                   conditionUserdata =temp.getUserdata();
+                   if(variablesMap.containsKey(conditionUserdata[0])) {
+                       myaction = variablesMap.get(conditionUserdata[0]);
+                       conditionNexts=temp.getNext();
+                       if(conditionUserdata[1].contains("<")||conditionUserdata[1].contains(">")||conditionUserdata[1].contains("=")||conditionUserdata[1].contains("!")){
+                           System.out.println("hellooooooooooooooooooooooooo");
+                       }
+                       if(conditionNexts[0].getnextType().equals(myaction))
+                       {
+                           mytemp[0]=conditionNexts[0];
+                           temp= getCompleteShape(mytemp,s,count);
+                       }
+                       else
+                       {
+                           mytemp[0]=conditionNexts[1];
+                           temp= getCompleteShape(mytemp,s,count);
+                       }
                    }
-                   else {
-                       innerCount--;
+                   else
+                   {
+                       MyResponse.status="failer";
                    }
 
                }
+               MyResponse.result= executeshape(temp,subscriber);
            }
         }
    return MyResponse;
     }
+
+    public Shape getCompleteShape(NextShape mytemp[], Shape[] s, int count){
+
+        int innerCount = count;
+        Shape temp=null;
+        while (innerCount != 0) {
+            if (mytemp[0].getnextX() == s[innerCount - 1].getX() && mytemp[0].getnextY() == s[innerCount - 1].getY()) {
+                temp = s[innerCount - 1];
+                break;
+            } else {
+                innerCount--;
+            }
+        }
+        return  temp;
+    }
+
 
     int res;
     String finalresult;
@@ -185,15 +193,6 @@ public class MiddlewareController {
 
                     }
                 }
-//                if (var.length==3) {
-//                    //////////////msh 3rfa eh lzmt deee
-//                    if (name.equals(var[1])) { //v2
-//                        v2 = Integer.parseInt(variablesMap.get(name));
-//
-//                    }
-//                    if (name.equals(var[0]))//at2kd ano condition
-//                        myaction = variablesMap.get(name); // myaction feha el gayli mn url an kan addation aw subtraction
-//                }
             }
         }
         else
@@ -201,10 +200,6 @@ public class MiddlewareController {
             System.out.println("Empty");
         }
         int counter=0;
-       if(s.getType().equals("diamond"))
-         s.setType(myaction);
-      //  System.out.println("///////////////");
-       // System.out.println(s.getType());
         switch (s.getType()) {
             case "addition":
                  res=v1+v2;
@@ -280,17 +275,6 @@ public class MiddlewareController {
             case "ReadMobNumber":
                 finalresult=mobilenumber;
                 break;
-          //  case "diamond"    :
-
-                /*String [] con;
-                String [] splitedValue;
-                con=s.getUserdata();
-                splitedValue=con[0].split(" ");
-                for(int i=0; i<splitedValue.length; i++)
-                {
-                    System.out.println(splitedValue[i]);
-                }*/
-
         }
 
       return finalresult;
