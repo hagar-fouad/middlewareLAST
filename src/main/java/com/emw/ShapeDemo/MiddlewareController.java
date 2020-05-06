@@ -84,94 +84,90 @@ public class MiddlewareController {
 
     @GetMapping("middleware/{subscriber}/{workflow}")
     public MiddlewareResponse workflow(@PathVariable String workflow,@PathVariable String subscriber, WebRequest webRequest) throws IOException, SAXException, ParserConfigurationException, TransformerException {
+
+        //webRequest holds any number of variables in the url
         Map<String, String[]> params = webRequest.getParameterMap();
-        for (Map.Entry<String, String[]> entry : params.entrySet()) {
+        //returns parms into our Global variable map where key is the variable name and value is the value of that variable
+        for (Map.Entry<String, String[]> entry : params.entrySet())
             variablesMap.put(entry.getKey(), entry.getValue()[0]);
-        }
 
-        Shape[] s=workflowService.getWorkflow(workflow);
-        System.out.println(s);
+        //getting the array of shapes from JSON into workflowShapes
+        Shape[] workflowShapes=workflowService.getWorkflow(workflow);
         int count=0;
-        for(int i=0; i<s.length; i++)
-        {
-            if(s[i]!=null)
-            {
+        //this loop is for counting the number of shapes i have
+        //we can't use workflowShapes.length because it returns a static size of 100
+        for(int i=0; i<workflowShapes.length; i++)
+            if(workflowShapes[i]!=null)
                count++;
-            }
             else
-            {
                 break;
-            }
-        }
 
-        Shape temp=s[0];
-        //hwa hwa el shape
-        NextShape[] mytemp;
-        MiddlewareResponse MyResponse= new MiddlewareResponse();
-        MyResponse.status="Succes";
+        //complete shape will always start with the start bubble which is always the first shape in the array of shapes(workflowShapes)
+        Shape completeShape=workflowShapes[0];
+        NextShape[] nextHalfShape;//nextHalfShape will be the .next of out completeShape but won't contain the userData of the completeShape
+        MiddlewareResponse Response2Execution= new MiddlewareResponse();//the response returned after executing the workflow
+        Response2Execution.status="Success";//initialize status of response to be successfully executed
         String [] conditionUserdata;
         NextShape [] conditionNexts;
+        //loops over each bubble/shape executing it in the process
         while(true) //for one end and always start at the beginning of the array
         {
-            mytemp= temp.getNext();
-
-           if (mytemp[0].getnextX()==0 && mytemp[0].getnextY()==0)
+            nextHalfShape= completeShape.getNext();
+            if (nextHalfShape[0].getnextX()==0 && nextHalfShape[0].getnextY()==0)//breaks when end shape is reached
                break;
-           if (mytemp.length==1) {//bt2kd an start awl haga btdkholi msh diamond awl haga tkhosh
+            ///--------el if condition de malhash ay talateen lazma garabe sheleha ma3 hagar------
+            if (nextHalfShape.length==1) {//bt2kd an start awl haga btdkholi msh diamond awl haga tkhosh
                int innerCount = count;
-               temp= getCompleteShape(mytemp,s,count);
-               if (temp.getType().equals("diamond"))
+               completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
+               if (completeShape.getType().equals("diamond"))//if the complete shape is a diamond, execute a certain path don't execute the diamond itself
                {
-                   conditionUserdata =temp.getUserdata();
+                   conditionUserdata =completeShape.getUserdata();
                    if(variablesMap.containsKey(conditionUserdata[0])) {
                        myaction = variablesMap.get(conditionUserdata[0]);
-                       conditionNexts=temp.getNext();
+                       conditionNexts=completeShape.getNext();
                        if(conditionUserdata[1].contains("<")||conditionUserdata[1].contains(">")||conditionUserdata[1].contains("=")||conditionUserdata[1].contains("!")){
                            System.out.println("hellooooooooooooooooooooooooo");
                        }
                        if(conditionNexts[0].getnextType().equals(myaction))
                        {
-                           mytemp[0]=conditionNexts[0];
-                           temp= getCompleteShape(mytemp,s,count);
+                           nextHalfShape[0]=conditionNexts[0];
+                           completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
                        }
                        else
                        {
-                           mytemp[0]=conditionNexts[1];
-                           temp= getCompleteShape(mytemp,s,count);
+                           nextHalfShape[0]=conditionNexts[1];
+                           completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
                        }
                    }
                    else
                    {
-                       MyResponse.status="failer";
+                       Response2Execution.status="failer";
                    }
 
                }
-               MyResponse.result= executeshape(temp,subscriber);
+               Response2Execution.result= executeshape(completeShape,subscriber);
            }
         }
-   return MyResponse;
+   return Response2Execution;
     }
 
-    public Shape getCompleteShape(NextShape mytemp[], Shape[] s, int count){
-
-        int innerCount = count;
+    public Shape getCompleteShape(NextShape mytemp[], Shape[] s, int innerCount){
         Shape temp=null;
         while (innerCount != 0) {
             if (mytemp[0].getnextX() == s[innerCount - 1].getX() && mytemp[0].getnextY() == s[innerCount - 1].getY()) {
                 temp = s[innerCount - 1];
                 break;
-            } else {
+            }
+            else {
                 innerCount--;
             }
         }
         return  temp;
     }
-
-
     int res;
     String finalresult;
-   String myaction;
-   int resultCount=1;
+    String myaction;
+    int resultCount=1;
     public String executeshape(Shape s,String mobilenumber) throws ParserConfigurationException, IOException, SAXException, TransformerException {
         String [] var;
         var=s.getUserdata();
@@ -190,7 +186,6 @@ public class MiddlewareController {
                 if(var.length==2) {
                     if (name.equals(var[1])) { //v2
                         v2 = Integer.parseInt(variablesMap.get(name));
-
                     }
                 }
             }
@@ -264,8 +259,6 @@ public class MiddlewareController {
                     if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                         Element eElement = (Element) nNode;
                         if (eElement.getElementsByTagName("name").item(0).getTextContent().equals("serviceClassCurrent")) {
-                            //  System.out.println("Name : " + eElement.getElementsByTagName("name").item(0).getTextContent());
-                            System.out.println("value: " + eElement.getElementsByTagName("value").item(0).getTextContent());
                             finalresult=eElement.getElementsByTagName("value").item(0).getTextContent();
                             break;
                         }
