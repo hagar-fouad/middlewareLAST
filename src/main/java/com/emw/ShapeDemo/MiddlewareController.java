@@ -125,15 +125,87 @@ public class MiddlewareController {
                    if(variablesMap.containsKey(conditionUserdata[0])) {
                        myaction = variablesMap.get(conditionUserdata[0]);
                        conditionNexts=completeShape.getNext();
+                       String numberOnly= conditionUserdata[1].replaceAll("[^0-9]", "");
                        if(conditionUserdata[1].contains("<")||conditionUserdata[1].contains(">")||conditionUserdata[1].contains("=")||conditionUserdata[1].contains("!")){
-                           System.out.println("hellooooooooooooooooooooooooo");
+                           if(conditionUserdata[1].contains("<"))
+                           {
+                               if(Integer.parseInt(myaction)<Integer.parseInt(numberOnly))
+                               {
+                                   nextHalfShape[0]=conditionNexts[0];
+                                   completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
+                               }
+                               else{
+                                   nextHalfShape[0]=conditionNexts[1];
+                                   completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
+                               }
+                           }
+                           else if(conditionUserdata[1].contains("<="))
+                           {
+                               if(Integer.parseInt(myaction)<=Integer.parseInt(numberOnly))
+                               {
+                                   nextHalfShape[0]=conditionNexts[0];
+                                   completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
+                               }
+                               else{
+                                   nextHalfShape[0]=conditionNexts[1];
+                                   completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
+                               }
+                           }
+                           else if(conditionUserdata[1].contains(">"))
+                           {
+                               if(Integer.parseInt(myaction)>Integer.parseInt(numberOnly))
+                               {
+                                   nextHalfShape[0]=conditionNexts[0];
+                                   completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
+                               }
+                               else{
+                                   nextHalfShape[0]=conditionNexts[1];
+                                   completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
+                               }
+                           }
+                           else if(conditionUserdata[1].contains(">="))
+                           {
+                               if(Integer.parseInt(myaction)>=Integer.parseInt(numberOnly))
+                               {
+                                   nextHalfShape[0]=conditionNexts[0];
+                                   completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
+                               }
+                               else{
+                                   nextHalfShape[0]=conditionNexts[1];
+                                   completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
+                               }
+                           }
+                           else if(conditionUserdata[1].contains("=="))
+                           {
+                               if(Integer.parseInt(myaction)==Integer.parseInt(numberOnly))
+                               {
+                                   nextHalfShape[0]=conditionNexts[0];
+                                   completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
+                               }
+                               else{
+                                   nextHalfShape[0]=conditionNexts[1];
+                                   completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
+                               }
+                           }
+                           else if(conditionUserdata[1].contains("!="))
+                           {
+                               if(Integer.parseInt(myaction)!=Integer.parseInt(numberOnly))
+                               {
+                                   nextHalfShape[0]=conditionNexts[0];
+                                   completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
+                               }
+                               else{
+                                   nextHalfShape[0]=conditionNexts[1];
+                                   completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
+                               }
+                           }
                        }
-                       if(conditionNexts[0].getnextType().equals(myaction))
+                      else if(conditionNexts[0].getnextType().equals(myaction))
                        {
                            nextHalfShape[0]=conditionNexts[0];
                            completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
                        }
-                       else
+                       else if(conditionNexts[1].getnextType().equals(myaction))
                        {
                            nextHalfShape[0]=conditionNexts[1];
                            completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
