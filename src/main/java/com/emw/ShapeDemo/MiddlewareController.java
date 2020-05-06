@@ -187,6 +187,10 @@ public class MiddlewareController {
                     if (name.equals(var[1])) { //v2
                         v2 = Integer.parseInt(variablesMap.get(name));
                     }
+                    if(name.equals(var[0]))
+                    {
+                        v1=Integer.parseInt(variablesMap.get(name));
+                    }
                 }
             }
         }
