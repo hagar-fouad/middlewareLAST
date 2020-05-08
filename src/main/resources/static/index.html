@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+
+<body>
+<h1>Welcome To REST With Ajax !!!</h1>
+
+<script>
+$.ajax({
+         				type: "GET",
+         				url: "/Balance",
+         				success: getSuccess ,
+         				contentType: "text",
+
+ });
+
+
+ function getSuccess(data){
+console.log(data)
+  document.body.innerHTML = "<h1> " + data + "</h1> "
+document.body.innnerHTML = "<h2>Status : Success</h2>"
+ }
+</script>
+
+</body>
+</html>
