@@ -125,7 +125,13 @@ public class MiddlewareController {
                    if(variablesMap.containsKey(conditionUserdata[0])) {
                        myaction = variablesMap.get(conditionUserdata[0]);
                        conditionNexts=completeShape.getNext();
-                       String numberOnly= conditionUserdata[1].replaceAll("[^0-9]", "");
+                       String numberOnly="";
+
+                    //   if(conditionUserdata[1].contains("[^0-9])"))
+                      // {
+                            numberOnly = conditionUserdata[1].replaceAll("[^0-9]", "");
+                       //}
+
                        if(conditionUserdata[1].contains("<")||conditionUserdata[1].contains(">")||conditionUserdata[1].contains("=")||conditionUserdata[1].contains("!")){
                            if(conditionUserdata[1].contains("<"))
                            {
@@ -210,6 +216,7 @@ public class MiddlewareController {
                            nextHalfShape[0]=conditionNexts[1];
                            completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
                        }
+
                    }
                    else
                    {
