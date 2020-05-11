@@ -126,14 +126,19 @@ public class MiddlewareController {
                        myaction = variablesMap.get(conditionUserdata[0]);
                        conditionNexts=completeShape.getNext();
                        String numberOnly="";
-
-                    //   if(conditionUserdata[1].contains("[^0-9])"))
-                      // {
+                       String[] parts =  conditionUserdata[1].split("<=|>=|<|>|==|!=");
+                        if(variablesMap.containsKey(parts[1]))
+                        {
+                            numberOnly = variablesMap.get(parts[1]);
+                        }
+                        else
+                        {
                             numberOnly = conditionUserdata[1].replaceAll("[^0-9]", "");
-                       //}
+                        }
 
                        if(conditionUserdata[1].contains("<")||conditionUserdata[1].contains(">")||conditionUserdata[1].contains("=")||conditionUserdata[1].contains("!")){
-                           if(conditionUserdata[1].contains("<"))
+
+                           if(conditionUserdata[1].contains("<="))
                            {
                                if(Integer.parseInt(myaction)<Integer.parseInt(numberOnly))
                                {
@@ -145,7 +150,7 @@ public class MiddlewareController {
                                    completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
                                }
                            }
-                           else if(conditionUserdata[1].contains("<="))
+                           else if(conditionUserdata[1].contains("<"))
                            {
                                if(Integer.parseInt(myaction)<=Integer.parseInt(numberOnly))
                                {
@@ -157,7 +162,7 @@ public class MiddlewareController {
                                    completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
                                }
                            }
-                           else if(conditionUserdata[1].contains(">"))
+                           else if(conditionUserdata[1].contains(">="))
                            {
                                if(Integer.parseInt(myaction)>Integer.parseInt(numberOnly))
                                {
@@ -169,7 +174,7 @@ public class MiddlewareController {
                                    completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
                                }
                            }
-                           else if(conditionUserdata[1].contains(">="))
+                           else if(conditionUserdata[1].contains(">"))
                            {
                                if(Integer.parseInt(myaction)>=Integer.parseInt(numberOnly))
                                {
