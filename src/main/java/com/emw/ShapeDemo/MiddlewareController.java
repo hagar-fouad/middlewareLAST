@@ -130,6 +130,12 @@ public class MiddlewareController {
                         if(variablesMap.containsKey(parts[1]))
                         {
                             numberOnly = variablesMap.get(parts[1]);
+                            if(numberOnly.equals(""))
+                            {
+                                Response2Execution.status="Failer";
+                                Response2Execution.result="missing value";
+                                return Response2Execution;
+                            }
                         }
                         else
                         {
@@ -225,7 +231,9 @@ public class MiddlewareController {
                    }
                    else
                    {
-                       Response2Execution.status="failer";
+                       Response2Execution.status="Failer";
+                       Response2Execution.result="unexpected error";
+                       return Response2Execution;
                    }
 
                }
@@ -263,16 +271,33 @@ public class MiddlewareController {
                 // search  for value
                 if(var.length==1) {
                     if (name.equals(var[0])) { //v1
+                        if(name.equals(""))
+                        {
+                         //   Response2Execution.status="Failer";
+                            //Response2Execution.result="missing value";
+                            //return Response2Execution;
+                        }
                         v1 = Integer.parseInt(variablesMap.get(name));
                         System.out.println("Key = " + name + ", Value = " + v1);
                     }
                 }
                 if(var.length==2) {
                     if (name.equals(var[1])) { //v2
+                        if(name.equals(""))
+                        {
+                            //   Response2Execution.status="Failer";
+                            //Response2Execution.result="missing value";
+                            //return Response2Execution;
+                        }
                         v2 = Integer.parseInt(variablesMap.get(name));
                     }
                     if(name.equals(var[0]))
+                    {if(name.equals(""))
                     {
+                        //   Response2Execution.status="Failer";
+                        //Response2Execution.result="missing value";
+                        //return Response2Execution;
+                    }
                         v1=Integer.parseInt(variablesMap.get(name));
                     }
                 }
