@@ -83,7 +83,8 @@ public class MiddlewareController {
     }
 
     @GetMapping("middleware/{subscriber}/{workflow}")
-    public MiddlewareResponse workflow(@PathVariable String workflow,@PathVariable String subscriber, WebRequest webRequest) throws IOException, SAXException, ParserConfigurationException, TransformerException {
+    public MiddlewareResponse workflow(@PathVariable String workflow,@PathVariable String subscriber, WebRequest webRequest) throws IOException, SAXException, ParserConfigurationException, TransformerException
+    {
 
         //webRequest holds any number of variables in the url
         Map<String, String[]> params = webRequest.getParameterMap();
@@ -238,6 +239,12 @@ public class MiddlewareController {
 
                }
                Response2Execution.result= executeshape(completeShape,subscriber);
+               if (Response2Execution.result.equals("failure"))
+               {
+                   Response2Execution.status="Failer";
+                   Response2Execution.result="missing value";
+                   return Response2Execution;
+               }
            }
         }
    return Response2Execution;
@@ -262,6 +269,7 @@ public class MiddlewareController {
     int resultCount=1;
     public String executeshape(Shape s,String mobilenumber) throws ParserConfigurationException, IOException, SAXException, TransformerException {
         String [] var;
+
         var=s.getUserdata();
          if(var.length>=1)
         {
@@ -273,40 +281,37 @@ public class MiddlewareController {
                     if (name.equals(var[0])) { //v1
                         if(name.equals(""))
                         {
-                         //   Response2Execution.status="Failer";
-                            //Response2Execution.result="missing value";
-                            //return Response2Execution;
+                          return "failure";
                         }
                         v1 = Integer.parseInt(variablesMap.get(name));
-                        System.out.println("Key = " + name + ", Value = " + v1);
                     }
                 }
                 if(var.length==2) {
                     if (name.equals(var[1])) { //v2
-                        if(name.equals(""))
+                        if(variablesMap.get(name).equals(""))
                         {
-                            //   Response2Execution.status="Failer";
-                            //Response2Execution.result="missing value";
-                            //return Response2Execution;
+                            return "failure";
                         }
                         v2 = Integer.parseInt(variablesMap.get(name));
                     }
                     if(name.equals(var[0]))
-                    {if(name.equals(""))
+                    {if(variablesMap.get(name).equals(""))
                     {
-                        //   Response2Execution.status="Failer";
-                        //Response2Execution.result="missing value";
-                        //return Response2Execution;
+                        return "failure";
                     }
                         v1=Integer.parseInt(variablesMap.get(name));
                     }
                 }
             }
-        }
-        else
-        {
-            System.out.println("Empty");
-        }
+        } else
+         {
+             if(!s.getType().equals("end"))
+             {
+                 return "failure";
+             }
+
+         }
+
         int counter=0;
         switch (s.getType()) {
             case "addition":
