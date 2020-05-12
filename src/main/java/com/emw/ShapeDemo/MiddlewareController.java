@@ -61,24 +61,33 @@ public class MiddlewareController {
         return null;
     }
 
-    public  void Readfile(String mob) throws ParserConfigurationException, IOException, SAXException, TransformerException {
+    public  void Readfile(String mob,String Filename,String amount) throws ParserConfigurationException, IOException, SAXException, TransformerException {
         //File xmlFile = new File("GetAccountDetails_Request.xml");
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-        Document doc = docBuilder.parse("GetAccountDetails_Request.xml");
+        Document doc = docBuilder.parse(Filename+"_Request.xml");
         // Get the root element
         Node methodcall = doc.getFirstChild();
         NodeList nList = doc.getElementsByTagName("member");
         Node node = nList.item(4);
         Element eElement = (Element) node;
 
-        System.out.println(eElement.getElementsByTagName("name").item(0).getTextContent());
         eElement.getElementsByTagName("value").item(0).setTextContent(mob);
-        System.out.println(eElement.getElementsByTagName("value").item(0).getTextContent());
+
+        if (Filename=="UpdateBalanceDate"){
+            Node node1 = nList.item(6);
+            Element eElement1 = (Element) node;
+            eElement.getElementsByTagName("value").item(0).setTextContent(amount);
+        }
+        if (Filename=="UpdateOffer"){
+            Node node1 = nList.item(5);
+            Element eElement1 = (Element) node;
+            eElement.getElementsByTagName("value").item(0).setTextContent(amount);
+        }
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         DOMSource source = new DOMSource(doc);
-        StreamResult result = new StreamResult(new File("GetAccountDetails_Request2.xml"));
+        StreamResult result = new StreamResult(new File(Filename+"_Request2.xml"));
         transformer.transform(source, result);
     }
 
@@ -133,7 +142,7 @@ public class MiddlewareController {
                             numberOnly = variablesMap.get(parts[1]);
                             if(numberOnly.equals(""))
                             {
-                                Response2Execution.status="Failer";
+                                Response2Execution.status="Faliure";
                                 Response2Execution.result="missing value";
                                 return Response2Execution;
                             }
@@ -232,7 +241,7 @@ public class MiddlewareController {
                    }
                    else
                    {
-                       Response2Execution.status="Failer";
+                       Response2Execution.status="failure";
                        Response2Execution.result="unexpected error";
                        return Response2Execution;
                    }
@@ -241,7 +250,7 @@ public class MiddlewareController {
                Response2Execution.result= executeshape(completeShape,subscriber);
                if (Response2Execution.result.equals("failure"))
                {
-                   Response2Execution.status="Failer";
+                   Response2Execution.status="failure";
                    Response2Execution.result="missing value";
                    return Response2Execution;
                }
@@ -303,14 +312,15 @@ public class MiddlewareController {
                     }
                 }
             }
-        } else
+        } /*else
          {
              if(!s.getType().equals("end"))
              {
                  return "failure";
              }
 
-         }
+         }*/
+
 
         int counter=0;
         switch (s.getType()) {
@@ -358,7 +368,7 @@ public class MiddlewareController {
                 break;
             case "GetAccountDetails":
                 ///hktb l mobilel gayly fl URL
-                Readfile(mobilenumber);
+                Readfile(mobilenumber,"GetAccountDetails",null);
                 ///bgeb l Response
                 RestTemplate restTemplate = new RestTemplate();
                 String fooResourceUrl
@@ -376,8 +386,9 @@ public class MiddlewareController {
                     //System.out.println("\nCurrent Element :" + nNode.getNodeName());
                     if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                         Element eElement = (Element) nNode;
-                        if (eElement.getElementsByTagName("name").item(0).getTextContent().equals("serviceClassCurrent")) {
+                        if (eElement.getElementsByTagName("name").item(0).getTextContent().equals("Balance")) {
                             finalresult=eElement.getElementsByTagName("value").item(0).getTextContent();
+                            variablesMap.put("Balance", finalresult);
                             break;
                         }
                     }
@@ -385,6 +396,65 @@ public class MiddlewareController {
                 break;
             case "ReadMobNumber":
                 finalresult=mobilenumber;
+                break;
+            case "UpdateOffer":
+                String amount=variablesMap.get("offerID");
+                Readfile(mobilenumber,"UpdateOffer",amount);
+                ///bgeb l Response
+                RestTemplate restTemplate1 = new RestTemplate();
+                String fooResourceUrl1
+                        = "http://localhost:8080//UpdateOffer";
+                ResponseEntity<String> response1
+                        = restTemplate1.getForEntity(fooResourceUrl1 , String.class);
+                String responsebody1=response1.getBody();
+                Document doc1 = convertStringToXMLDocument( responsebody1 );
+                //Verify XML document is build correctly
+                //System.out.println(doc.getFirstChild().getNodeName());
+                Node methodcall1 = doc1.getFirstChild();
+                NodeList nList1 = doc1.getElementsByTagName("member");
+                for (int temp = 0; temp < nList1.getLength(); temp++) {
+                    Node nNode = nList1.item(temp);
+                    //System.out.println("\nCurrent Element :" + nNode.getNodeName());
+                    if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                        Element eElement = (Element) nNode;
+                        if (eElement.getElementsByTagName("name").item(0).getTextContent().equals("responseCode")) {
+                            finalresult=eElement.getElementsByTagName("value").item(0).getTextContent();
+                            variablesMap.put("responseCode", finalresult);
+                            System.out.println(finalresult);
+                            break;
+                        }
+                    }
+                }
+                break;
+            case "UpdateBalanceDate":
+                String amount2=variablesMap.get("offer");
+                //System.out.println(amount);
+                Readfile(mobilenumber,"UpdateBalanceDate",amount2);
+                ///bgeb l Response
+                RestTemplate restTemplate2 = new RestTemplate();
+                String fooResourceUrl2
+                        = "http://localhost:8080//UpdateBalanceDate";
+                ResponseEntity<String> response2
+                        = restTemplate2.getForEntity(fooResourceUrl2 , String.class);
+                String responsebody2=response2.getBody();
+                Document doc2 = convertStringToXMLDocument( responsebody2 );
+                //Verify XML document is build correctly
+                //System.out.println(doc.getFirstChild().getNodeName());
+                Node methodcall2 = doc2.getFirstChild();
+                NodeList nList2 = doc2.getElementsByTagName("member");
+                for (int temp = 0; temp < nList2.getLength(); temp++) {
+                    Node nNode = nList2.item(temp);
+                    //System.out.println("\nCurrent Element :" + nNode.getNodeName());
+                    if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                        Element eElement = (Element) nNode;
+                        if (eElement.getElementsByTagName("name").item(0).getTextContent().equals("responseCode")) {
+                            finalresult=eElement.getElementsByTagName("value").item(0).getTextContent();
+                            variablesMap.put("responseCode", finalresult);
+                            System.out.println(finalresult);
+                            break;
+                        }
+                    }
+                }
                 break;
         }
 
