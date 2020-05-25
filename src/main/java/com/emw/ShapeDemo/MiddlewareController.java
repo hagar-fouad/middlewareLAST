@@ -115,7 +115,7 @@ public class MiddlewareController {
         //complete shape will always start with the start bubble which is always the first shape in the array of shapes(workflowShapes)
         Shape completeShape=workflowShapes[0];
         NextShape[] nextHalfShape;//nextHalfShape will be the .next of out completeShape but won't contain the userData of the completeShape
-        MiddlewareResponse Response2Execution= new MiddlewareResponse();//the response returned after executing the workflow
+        MiddlewareResponse  Response2Execution= new MiddlewareResponse();//the response returned after executing the workflow
         Response2Execution.status="Success";//initialize status of response to be successfully executed
         String [] conditionUserdata;
         NextShape [] conditionNexts;
@@ -143,7 +143,7 @@ public class MiddlewareController {
                             if(numberOnly.equals(""))
                             {
                                 Response2Execution.status="Faliure";
-                                Response2Execution.result="missing value";
+                                Response2Execution.result[0]="missing value";
                                 return Response2Execution;
                             }
                         }
@@ -242,20 +242,23 @@ public class MiddlewareController {
                    else
                    {
                        Response2Execution.status="failure";
-                       Response2Execution.result="unexpected error";
+                       Response2Execution.result[0]="unexpected error";
                        return Response2Execution;
                    }
 
                }
-               Response2Execution.result= executeshape(completeShape,subscriber);
-               if (Response2Execution.result.equals("failure"))
+
+               Response2Execution.result= executeshape(completeShape,subscriber);//a7awl result l status
+
+               if (Response2Execution.result[0].equals("failure"))
                {
                    Response2Execution.status="failure";
-                   Response2Execution.result="missing value";
+                   Response2Execution.result[0]="missing value";
                    return Response2Execution;
                }
            }
         }
+
    return Response2Execution;
     }
 
@@ -276,7 +279,7 @@ public class MiddlewareController {
     String finalresult;
     String myaction;
     int resultCount=1;
-    public String executeshape(Shape s,String mobilenumber) throws ParserConfigurationException, IOException, SAXException, TransformerException {
+    public String[] executeshape(Shape s,String mobilenumber) throws ParserConfigurationException, IOException, SAXException, TransformerException {
         String [] var;
 
         var=s.getUserdata();
@@ -290,7 +293,7 @@ public class MiddlewareController {
                     if (name.equals(var[0])) { //v1
                         if(name.equals(""))
                         {
-                          return "failure";
+                          return new String[]{"Failure"};
                         }
                         v1 = Integer.parseInt(variablesMap.get(name));
                     }
@@ -299,14 +302,14 @@ public class MiddlewareController {
                     if (name.equals(var[1])) { //v2
                         if(variablesMap.get(name).equals(""))
                         {
-                            return "failure";
+                            return new String[]{"Failure"};
                         }
                         v2 = Integer.parseInt(variablesMap.get(name));
                     }
                     if(name.equals(var[0]))
                     {if(variablesMap.get(name).equals(""))
                     {
-                        return "failure";
+                        return new String[]{"Failure"};
                     }
                         v1=Integer.parseInt(variablesMap.get(name));
                     }
@@ -366,6 +369,19 @@ public class MiddlewareController {
                 variablesMap.put("res"+resultCount, finalresult);
                 resultCount++;
                 break;
+            case "end":
+                int resultCount=0;
+                String[] resultArray=new String[var.length];
+                for(int i=0; i<var.length; i++)
+                {
+                    if(variablesMap.containsKey(var[i]))
+                    {
+                        resultArray[resultCount]=var[i]+": "+variablesMap.get(var[i]);
+                        resultCount++;
+                    }
+                }
+                return resultArray;
+
             case "GetAccountDetails":
                 ///hktb l mobilel gayly fl URL
                 Readfile(mobilenumber,"GetAccountDetails",null);
@@ -449,16 +465,17 @@ public class MiddlewareController {
                         Element eElement = (Element) nNode;
                         if (eElement.getElementsByTagName("name").item(0).getTextContent().equals("responseCode")) {
                             finalresult=eElement.getElementsByTagName("value").item(0).getTextContent();
-                            variablesMap.put("responseCode", finalresult);
+                            variablesMap.put("responseCode", finalresult); //msh el mfrod da esmo success
                             System.out.println(finalresult);
                             break;
                         }
                     }
                 }
                 break;
+
         }
 
-      return finalresult;
+      return new String[]{finalresult};
     }
 
 
