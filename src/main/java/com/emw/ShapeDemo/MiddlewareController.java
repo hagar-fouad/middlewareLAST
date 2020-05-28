@@ -61,29 +61,39 @@ public class MiddlewareController {
         return null;
     }
 
-    public  void Readfile(String mob) throws ParserConfigurationException, IOException, SAXException, TransformerException {
+    public  void Readfile(String mob,String Filename,String amount) throws ParserConfigurationException, IOException, SAXException, TransformerException {
         //File xmlFile = new File("GetAccountDetails_Request.xml");
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-        Document doc = docBuilder.parse("GetAccountDetails_Request.xml");
+        Document doc = docBuilder.parse(Filename+"_Request.xml");
         // Get the root element
         Node methodcall = doc.getFirstChild();
         NodeList nList = doc.getElementsByTagName("member");
         Node node = nList.item(4);
         Element eElement = (Element) node;
 
-        System.out.println(eElement.getElementsByTagName("name").item(0).getTextContent());
         eElement.getElementsByTagName("value").item(0).setTextContent(mob);
-        System.out.println(eElement.getElementsByTagName("value").item(0).getTextContent());
+
+        if (Filename=="UpdateBalanceDate"){
+            Node node1 = nList.item(6);
+            Element eElement1 = (Element) node;
+            eElement.getElementsByTagName("value").item(0).setTextContent(amount);
+        }
+        if (Filename=="UpdateOffer"){
+            Node node1 = nList.item(5);
+            Element eElement1 = (Element) node;
+            eElement.getElementsByTagName("value").item(0).setTextContent(amount);
+        }
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         DOMSource source = new DOMSource(doc);
-        StreamResult result = new StreamResult(new File("GetAccountDetails_Request2.xml"));
+        StreamResult result = new StreamResult(new File(Filename+"_Request2.xml"));
         transformer.transform(source, result);
     }
 
     @GetMapping("middleware/{subscriber}/{workflow}")
-    public MiddlewareResponse workflow(@PathVariable String workflow,@PathVariable String subscriber, WebRequest webRequest) throws IOException, SAXException, ParserConfigurationException, TransformerException {
+    public MiddlewareResponse workflow(@PathVariable String workflow,@PathVariable String subscriber, WebRequest webRequest) throws IOException, SAXException, ParserConfigurationException, TransformerException
+    {
 
         //webRequest holds any number of variables in the url
         Map<String, String[]> params = webRequest.getParameterMap();
@@ -105,7 +115,7 @@ public class MiddlewareController {
         //complete shape will always start with the start bubble which is always the first shape in the array of shapes(workflowShapes)
         Shape completeShape=workflowShapes[0];
         NextShape[] nextHalfShape;//nextHalfShape will be the .next of out completeShape but won't contain the userData of the completeShape
-        MiddlewareResponse Response2Execution= new MiddlewareResponse();//the response returned after executing the workflow
+        MiddlewareResponse  Response2Execution= new MiddlewareResponse();//the response returned after executing the workflow
         Response2Execution.status="Success";//initialize status of response to be successfully executed
         String [] conditionUserdata;
         NextShape [] conditionNexts;
@@ -125,9 +135,26 @@ public class MiddlewareController {
                    if(variablesMap.containsKey(conditionUserdata[0])) {
                        myaction = variablesMap.get(conditionUserdata[0]);
                        conditionNexts=completeShape.getNext();
-                       String numberOnly= conditionUserdata[1].replaceAll("[^0-9]", "");
+                       String numberOnly="";
+                       String[] parts =  conditionUserdata[1].split("<=|>=|<|>|==|!=");
+                        if(variablesMap.containsKey(parts[1]))
+                        {
+                            numberOnly = variablesMap.get(parts[1]);
+                            if(numberOnly.equals(""))
+                            {
+                                Response2Execution.status="Faliure";
+                                Response2Execution.result[0]="missing value";
+                                return Response2Execution;
+                            }
+                        }
+                        else
+                        {
+                            numberOnly = conditionUserdata[1].replaceAll("[^0-9]", "");
+                        }
+
                        if(conditionUserdata[1].contains("<")||conditionUserdata[1].contains(">")||conditionUserdata[1].contains("=")||conditionUserdata[1].contains("!")){
-                           if(conditionUserdata[1].contains("<"))
+
+                           if(conditionUserdata[1].contains("<="))
                            {
                                if(Integer.parseInt(myaction)<Integer.parseInt(numberOnly))
                                {
@@ -139,7 +166,7 @@ public class MiddlewareController {
                                    completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
                                }
                            }
-                           else if(conditionUserdata[1].contains("<="))
+                           else if(conditionUserdata[1].contains("<"))
                            {
                                if(Integer.parseInt(myaction)<=Integer.parseInt(numberOnly))
                                {
@@ -151,7 +178,7 @@ public class MiddlewareController {
                                    completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
                                }
                            }
-                           else if(conditionUserdata[1].contains(">"))
+                           else if(conditionUserdata[1].contains(">="))
                            {
                                if(Integer.parseInt(myaction)>Integer.parseInt(numberOnly))
                                {
@@ -163,7 +190,7 @@ public class MiddlewareController {
                                    completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
                                }
                            }
-                           else if(conditionUserdata[1].contains(">="))
+                           else if(conditionUserdata[1].contains(">"))
                            {
                                if(Integer.parseInt(myaction)>=Integer.parseInt(numberOnly))
                                {
@@ -210,16 +237,28 @@ public class MiddlewareController {
                            nextHalfShape[0]=conditionNexts[1];
                            completeShape= getCompleteShape(nextHalfShape,workflowShapes,count);
                        }
+
                    }
                    else
                    {
-                       Response2Execution.status="failer";
+                       Response2Execution.status="failure";
+                       Response2Execution.result[0]="unexpected error";
+                       return Response2Execution;
                    }
 
                }
-               Response2Execution.result= executeshape(completeShape,subscriber);
+
+               Response2Execution.result= executeshape(completeShape,subscriber);//a7awl result l status
+
+               if (Response2Execution.result[0].equals("failure"))
+               {
+                   Response2Execution.status="failure";
+                   Response2Execution.result[0]="missing value";
+                   return Response2Execution;
+               }
            }
         }
+
    return Response2Execution;
     }
 
@@ -240,8 +279,9 @@ public class MiddlewareController {
     String finalresult;
     String myaction;
     int resultCount=1;
-    public String executeshape(Shape s,String mobilenumber) throws ParserConfigurationException, IOException, SAXException, TransformerException {
+    public String[] executeshape(Shape s,String mobilenumber) throws ParserConfigurationException, IOException, SAXException, TransformerException {
         String [] var;
+
         var=s.getUserdata();
          if(var.length>=1)
         {
@@ -251,25 +291,40 @@ public class MiddlewareController {
                 // search  for value
                 if(var.length==1) {
                     if (name.equals(var[0])) { //v1
+                        if(name.equals(""))
+                        {
+                          return new String[]{"Failure"};
+                        }
                         v1 = Integer.parseInt(variablesMap.get(name));
-                        System.out.println("Key = " + name + ", Value = " + v1);
                     }
                 }
                 if(var.length==2) {
                     if (name.equals(var[1])) { //v2
+                        if(variablesMap.get(name).equals(""))
+                        {
+                            return new String[]{"Failure"};
+                        }
                         v2 = Integer.parseInt(variablesMap.get(name));
                     }
                     if(name.equals(var[0]))
+                    {if(variablesMap.get(name).equals(""))
                     {
+                        return new String[]{"Failure"};
+                    }
                         v1=Integer.parseInt(variablesMap.get(name));
                     }
                 }
             }
-        }
-        else
-        {
-            System.out.println("Empty");
-        }
+        } /*else
+         {
+             if(!s.getType().equals("end"))
+             {
+                 return "failure";
+             }
+
+         }*/
+
+
         int counter=0;
         switch (s.getType()) {
             case "addition":
@@ -314,9 +369,22 @@ public class MiddlewareController {
                 variablesMap.put("res"+resultCount, finalresult);
                 resultCount++;
                 break;
+            case "end":
+                int resultCount=0;
+                String[] resultArray=new String[var.length];
+                for(int i=0; i<var.length; i++)
+                {
+                    if(variablesMap.containsKey(var[i]))
+                    {
+                        resultArray[resultCount]=var[i]+": "+variablesMap.get(var[i]);
+                        resultCount++;
+                    }
+                }
+                return resultArray;
+
             case "GetAccountDetails":
                 ///hktb l mobilel gayly fl URL
-                Readfile(mobilenumber);
+                Readfile(mobilenumber,"GetAccountDetails",null);
                 ///bgeb l Response
                 RestTemplate restTemplate = new RestTemplate();
                 String fooResourceUrl
@@ -334,8 +402,9 @@ public class MiddlewareController {
                     //System.out.println("\nCurrent Element :" + nNode.getNodeName());
                     if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                         Element eElement = (Element) nNode;
-                        if (eElement.getElementsByTagName("name").item(0).getTextContent().equals("serviceClassCurrent")) {
+                        if (eElement.getElementsByTagName("name").item(0).getTextContent().equals("Balance")) {
                             finalresult=eElement.getElementsByTagName("value").item(0).getTextContent();
+                            variablesMap.put("Balance", finalresult);
                             break;
                         }
                     }
@@ -344,9 +413,69 @@ public class MiddlewareController {
             case "ReadMobNumber":
                 finalresult=mobilenumber;
                 break;
+            case "UpdateOffer":
+                String amount=variablesMap.get("offerID");
+                Readfile(mobilenumber,"UpdateOffer",amount);
+                ///bgeb l Response
+                RestTemplate restTemplate1 = new RestTemplate();
+                String fooResourceUrl1
+                        = "http://localhost:8080//UpdateOffer";
+                ResponseEntity<String> response1
+                        = restTemplate1.getForEntity(fooResourceUrl1 , String.class);
+                String responsebody1=response1.getBody();
+                Document doc1 = convertStringToXMLDocument( responsebody1 );
+                //Verify XML document is build correctly
+                //System.out.println(doc.getFirstChild().getNodeName());
+                Node methodcall1 = doc1.getFirstChild();
+                NodeList nList1 = doc1.getElementsByTagName("member");
+                for (int temp = 0; temp < nList1.getLength(); temp++) {
+                    Node nNode = nList1.item(temp);
+                    //System.out.println("\nCurrent Element :" + nNode.getNodeName());
+                    if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                        Element eElement = (Element) nNode;
+                        if (eElement.getElementsByTagName("name").item(0).getTextContent().equals("responseCode")) {
+                            finalresult=eElement.getElementsByTagName("value").item(0).getTextContent();
+                            variablesMap.put("responseCode", finalresult);
+                            System.out.println(finalresult);
+                            break;
+                        }
+                    }
+                }
+                break;
+            case "UpdateBalanceDate":
+                String amount2=variablesMap.get("offer");
+                //System.out.println(amount);
+                Readfile(mobilenumber,"UpdateBalanceDate",amount2);
+                ///bgeb l Response
+                RestTemplate restTemplate2 = new RestTemplate();
+                String fooResourceUrl2
+                        = "http://localhost:8080//UpdateBalanceDate";
+                ResponseEntity<String> response2
+                        = restTemplate2.getForEntity(fooResourceUrl2 , String.class);
+                String responsebody2=response2.getBody();
+                Document doc2 = convertStringToXMLDocument( responsebody2 );
+                //Verify XML document is build correctly
+                //System.out.println(doc.getFirstChild().getNodeName());
+                Node methodcall2 = doc2.getFirstChild();
+                NodeList nList2 = doc2.getElementsByTagName("member");
+                for (int temp = 0; temp < nList2.getLength(); temp++) {
+                    Node nNode = nList2.item(temp);
+                    //System.out.println("\nCurrent Element :" + nNode.getNodeName());
+                    if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                        Element eElement = (Element) nNode;
+                        if (eElement.getElementsByTagName("name").item(0).getTextContent().equals("responseCode")) {
+                            finalresult=eElement.getElementsByTagName("value").item(0).getTextContent();
+                            variablesMap.put("responseCode", finalresult); //msh el mfrod da esmo success
+                            System.out.println(finalresult);
+                            break;
+                        }
+                    }
+                }
+                break;
+
         }
 
-      return finalresult;
+      return new String[]{finalresult};
     }
 
 

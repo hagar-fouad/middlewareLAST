@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class MiddlewareResponse {
-    String status;
-    String result;
+    String  status;
+    String [] result;
 }
