@@ -29,11 +29,9 @@ import java.util.*;
 
 @RestController
 public class MiddlewareController {
-     Map< String,String> variablesMap =
-      new HashMap< String,String>();
 
-    int v1;
-    int v2;
+
+
     @Autowired
     private WorkflowService workflowService;
 
@@ -92,8 +90,12 @@ public class MiddlewareController {
     }
 
     @GetMapping("middleware/{subscriber}/{workflow}")
-    public MiddlewareResponse workflow(@PathVariable String workflow,@PathVariable String subscriber, WebRequest webRequest) throws IOException, SAXException, ParserConfigurationException, TransformerException
+    public  MiddlewareResponse workflow(@PathVariable String workflow,@PathVariable String subscriber, WebRequest webRequest) throws IOException, SAXException, ParserConfigurationException, TransformerException
     {
+        String myaction;
+        int resultCount=0;
+        Map< String,String> variablesMap =
+        new HashMap< String,String>();
 
         //webRequest holds any number of variables in the url
         Map<String, String[]> params = webRequest.getParameterMap();
@@ -115,13 +117,14 @@ public class MiddlewareController {
         //complete shape will always start with the start bubble which is always the first shape in the array of shapes(workflowShapes)
         Shape completeShape=workflowShapes[0];
         NextShape[] nextHalfShape;//nextHalfShape will be the .next of out completeShape but won't contain the userData of the completeShape
-        MiddlewareResponse  Response2Execution= new MiddlewareResponse();//the response returned after executing the workflow
-        Response2Execution.status="Success";//initialize status of response to be successfully executed
+        MiddlewareResponse  response2Execution= new MiddlewareResponse();//the response returned after executing the workflow
+        response2Execution.status="Success";//initialize status of response to be successfully executed
         String [] conditionUserdata;
         NextShape [] conditionNexts;
         //loops over each bubble/shape executing it in the process
         while(true) //for one end and always start at the beginning of the array
         {
+            System.out.println();
             nextHalfShape= completeShape.getNext();
             if (nextHalfShape[0].getnextX()==0 && nextHalfShape[0].getnextY()==0)//breaks when end shape is reached
                break;
@@ -142,9 +145,9 @@ public class MiddlewareController {
                             numberOnly = variablesMap.get(parts[1]);
                             if(numberOnly.equals(""))
                             {
-                                Response2Execution.status="Faliure";
-                                Response2Execution.result[0]="missing value";
-                                return Response2Execution;
+                                response2Execution.status="Faliure";
+                                response2Execution.result[0]="missing value";
+                                return response2Execution;
                             }
                         }
                         else
@@ -241,25 +244,25 @@ public class MiddlewareController {
                    }
                    else
                    {
-                       Response2Execution.status="failure";
-                       Response2Execution.result[0]="unexpected error";
-                       return Response2Execution;
+                       response2Execution.status="failure";
+                       response2Execution.result[0]="unexpected error";
+                       return response2Execution;
                    }
 
                }
+                resultCount++;
+               response2Execution.result= executeshape(completeShape,subscriber,variablesMap,resultCount);//a7awl result l status
 
-               Response2Execution.result= executeshape(completeShape,subscriber);//a7awl result l status
-
-               if (Response2Execution.result[0].equals("failure"))
+               if (response2Execution.result[0].equals("failure"))
                {
-                   Response2Execution.status="failure";
-                   Response2Execution.result[0]="missing value";
-                   return Response2Execution;
+                   response2Execution.status="failure";
+                   response2Execution.result[0]="missing value";
+                   return response2Execution;
                }
            }
         }
-
-   return Response2Execution;
+        System.out.println(response2Execution.toString());
+   return response2Execution;
     }
 
     public Shape getCompleteShape(NextShape mytemp[], Shape[] s, int innerCount){
@@ -275,11 +278,14 @@ public class MiddlewareController {
         }
         return  temp;
     }
-    int res;
-    String finalresult;
-    String myaction;
-    int resultCount=1;
-    public String[] executeshape(Shape s,String mobilenumber) throws ParserConfigurationException, IOException, SAXException, TransformerException {
+
+    public String[] executeshape(Shape s,String mobilenumber,Map< String,String> variablesMap,int resultCount) throws ParserConfigurationException, IOException, SAXException, TransformerException
+
+    {
+        int v1=0;
+        int v2=0;
+        int res;
+        String finalresult="";
         String [] var;
 
         var=s.getUserdata();
@@ -331,55 +337,56 @@ public class MiddlewareController {
                  res=v1+v2;
                 finalresult=String.valueOf(res);
                 variablesMap.put("res"+resultCount, finalresult);
-                resultCount++;
+                //resultCount++;
                 break;
             case "subtraction":
                 res=v1-v2;
                 finalresult=String.valueOf(res);
                 variablesMap.put("res"+resultCount, finalresult);
-                resultCount++;
+                //resultCount++;
                 break;
             case "multiplication":
                 res=v1*v2;
                 finalresult=String.valueOf(res);
                 variablesMap.put("res"+resultCount, finalresult);
-                resultCount++;
+                //resultCount++;
                 break;
             case "division":
                 res=v1/v2;
                 finalresult=String.valueOf(res);
                 variablesMap.put("res"+resultCount, finalresult);
-                resultCount++;
+                //resultCount++;
                 break;
             case "AND":
                 res=v1&v2;
                 finalresult=String.valueOf(res);
                 variablesMap.put("res"+resultCount, finalresult);
-                resultCount++;
+                //resultCount++;
                 break;
             case "OR":
                 res=v1 | v2;
                 finalresult=String.valueOf(res);
                 variablesMap.put("res"+resultCount, finalresult);
-                resultCount++;
+                //resultCount++;
                 break;
             case "NOT":
                 res=~v1;
                 finalresult=String.valueOf(res);
                 variablesMap.put("res"+resultCount, finalresult);
-                resultCount++;
+                //resultCount++;
                 break;
             case "end":
-                int resultCount=0;
+                int resultt=0;
                 String[] resultArray=new String[var.length];
                 for(int i=0; i<var.length; i++)
                 {
                     if(variablesMap.containsKey(var[i]))
                     {
-                        resultArray[resultCount]=var[i]+": "+variablesMap.get(var[i]);
-                        resultCount++;
+                        resultArray[resultt]=var[i]+": "+variablesMap.get(var[i]);
+                        resultt++;
                     }
                 }
+
                 return resultArray;
 
             case "GetAccountDetails":
@@ -474,7 +481,6 @@ public class MiddlewareController {
                 break;
 
         }
-
       return new String[]{finalresult};
     }
 
