@@ -454,7 +454,7 @@ public class MiddlewareController {
                         Element eElement = (Element) nNode;
                         if (eElement.getElementsByTagName("name").item(0).getTextContent().equals("responseCode")) {
                             finalresult=eElement.getElementsByTagName("value").item(0).getTextContent();
-                            variablesMap.put("responseCode", finalresult);
+                            variablesMap.put("responsecode", finalresult);
                             System.out.println(finalresult);
                             break;
                         }
@@ -484,7 +484,7 @@ public class MiddlewareController {
                         Element eElement = (Element) nNode;
                         if (eElement.getElementsByTagName("name").item(0).getTextContent().equals("responseCode")) {
                             finalresult=eElement.getElementsByTagName("value").item(0).getTextContent();
-                            variablesMap.put("responseCode", finalresult); //msh el mfrod da esmo success
+                            variablesMap.put("success", finalresult); //msh el mfrod da esmo success
                             System.out.println(finalresult);
                             break;
                         }
