@@ -252,6 +252,12 @@ public class MiddlewareController {
                }
                 resultCount++;
                response2Execution.result= executeshape(completeShape,subscriber,variablesMap,resultCount);//a7awl result l status
+               if(response2Execution.result.length==0){
+
+                   response2Execution.status="Success";
+                   response2Execution.result[0]="No value to be returned";
+                   return response2Execution;
+               }
 
                if (response2Execution.result[0].equals("failure"))
                {
@@ -377,16 +383,22 @@ public class MiddlewareController {
                 break;
             case "end":
                 int resultt=0;
-                String[] resultArray=new String[var.length];
-                for(int i=0; i<var.length; i++)
-                {
-                    if(variablesMap.containsKey(var[i]))
-                    {
-                        resultArray[resultt]=var[i]+": "+variablesMap.get(var[i]);
-                        resultt++;
+                String[] resultArray;
+                if (var.length == 0) {
+                    resultArray=new String[1];
+                    resultArray[0]="nothing to be returned";
+
+                }
+                else {
+
+                    resultArray = new String[var.length];
+                    for (int i = 0; i < var.length; i++) {
+                        if (variablesMap.containsKey(var[i])) {
+                            resultArray[resultt] = var[i] + ": " + variablesMap.get(var[i]);
+                            resultt++;
+                        }
                     }
                 }
-
                 return resultArray;
 
             case "GetAccountDetails":
