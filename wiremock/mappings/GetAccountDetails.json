@@ -1,0 +1,10 @@
+{
+    "request": {
+        "method": "GET",
+        "url": "/GetAccountDetails"
+    },
+    "response": {
+        "status": 200,
+        "bodyFileName": "GetAccountDetails_Response.xml"
+    }
+}

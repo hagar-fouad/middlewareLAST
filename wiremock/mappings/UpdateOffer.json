@@ -1,0 +1,10 @@
+{
+    "request": {
+        "method": "GET",
+        "url": "/UpdateOffer"
+    },
+    "response": {
+        "status": 200,
+        "bodyFileName": "UpdateOffer_Response.xml"
+    }
+}
