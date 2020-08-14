@@ -26,7 +26,7 @@ public class shapeController {
 
         return workflowService.getWorkflow("user");
     }
-    @PostMapping("/workflow")
+    /*@PostMapping("/workflow")
     public String saveShape(@RequestBody Shape[] shape) throws IOException {
         try {
             Writer writer = new FileWriter("user.json");
@@ -37,6 +37,6 @@ public class shapeController {
             ex.printStackTrace();
         }
         return "success";
-    }
+    }*/
 }
 
